@@ -1,3 +1,8 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
+
+mod day_01;
+
 fn main() {
-    println!("Hello, world!");
+    day_01::f();
 }
