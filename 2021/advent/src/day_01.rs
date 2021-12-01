@@ -1,10 +1,7 @@
-pub fn f() {
-    let input = std::fs::read_to_string("input/1")
-        .expect("problem reading file")
-        .lines()
-        .map(|x| x.parse::<i32>().unwrap())
-        .collect::<Vec<i32>>();
+use super::input;
 
+pub fn f() {
+    let input = input::read::<i32>("1");
     part_one(&input);
     part_two(&input);
 }
