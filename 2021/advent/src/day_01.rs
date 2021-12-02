@@ -1,7 +1,7 @@
 use super::input;
 
 pub fn f() {
-    let input = input::read::<i32>("1");
+    let input = input::read::<i32>(1);
     part_one(&input);
     part_two(&input);
 }
