@@ -5,12 +5,16 @@ pub fn f() {
 
     let mut horizontal = 0;
     let mut depth = 0;
+    let mut aim = 0;
 
     for action in input {
         match action {
-            Action::Forward(x) => horizontal += x,
-            Action::Down(x) => depth += x,
-            Action::Up(x) => depth -= x,
+            Action::Forward(x) => {
+                horizontal += x;
+                depth += aim * x;
+            },
+            Action::Down(x) => aim += x,
+            Action::Up(x) => aim -= x,
         }
     }
 
