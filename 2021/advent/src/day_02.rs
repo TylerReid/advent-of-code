@@ -1,7 +1,7 @@
 use super::input;
 
 pub fn f() {
-    let input = input::read_parse(2, parse_input);
+    let input = input::read(2);
 
     let mut horizontal = 0;
     let mut depth = 0;
@@ -21,14 +21,19 @@ pub fn f() {
     println!("{}", horizontal * depth);
 }
 
-fn parse_input(s: &str) -> Action {
-    let parts: Vec<&str> = s.split(' ').collect();
+impl std::str::FromStr for Action {
+    type Err = std::num::ParseIntError;
 
-    match parts[0] {
-        "forward" => Action::Forward(parts[1].parse().unwrap()),
-        "down" => Action::Down(parts[1].parse().unwrap()),
-        "up" => Action::Up(parts[1].parse().unwrap()),
-        _ => panic!("unexpected value in {}", s),
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (d, v) = s.split_once(' ').unwrap();
+        let value = v.parse()?;
+        let result = match d {
+            "forward" => Action::Forward(value),
+            "down" => Action::Down(value),
+            "up" => Action::Up(value),
+            _ => panic!("unexpected value in {}", s),
+        };
+        Ok(result)
     }
 }
 
