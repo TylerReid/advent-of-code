@@ -2,8 +2,8 @@
 #![allow(unused_imports)]
 
 mod input;
-mod day_01;
+mod day_02;
 
 fn main() {
-    day_01::f();
+    day_02::f();
 }
