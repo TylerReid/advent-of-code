@@ -1,7 +1,11 @@
 use std::fmt;
 use std::str::FromStr;
 
-pub fn read<T>(day: u8) -> Vec<T> where T: FromStr, <T as FromStr>::Err: fmt::Debug {
+pub fn read<T>(day: u8) -> Vec<T>
+where
+    T: FromStr,
+    <T as FromStr>::Err: fmt::Debug,
+{
     std::fs::read_to_string(format!("input/{}", day))
         .expect("problem reading file")
         .lines()
@@ -15,4 +19,4 @@ pub fn read_parse<T>(day: u8, parse: fn(&str) -> T) -> Vec<T> {
         .lines()
         .map(|x| parse(x))
         .collect::<Vec<T>>()
-} 
+}
