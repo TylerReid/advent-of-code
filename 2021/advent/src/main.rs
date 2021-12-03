@@ -5,5 +5,5 @@ mod day_03;
 mod input;
 
 fn main() {
-    day_03::f();
+    day_03::part2();
 }
