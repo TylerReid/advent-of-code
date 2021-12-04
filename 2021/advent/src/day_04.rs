@@ -41,22 +41,51 @@ pub fn f() {
                     card[i][j] = card[i][j].mark_if_match(draw);
                 }
             }
+            if has_bingo(card) {
+                println!("Bingo!\n{:?}", card);
+
+                let sum = sum_unmarked(card);
+                println!("{} * {} = {}", sum, draw, sum*draw);
+                return
+            }
         }
     }
 
     println!("cards:\n{:?}", cards);
 }
 
-fn has_bingo(card: BingoCard) -> bool {
-    let mut previous = card[0][0];
+fn has_bingo(card: &BingoCard) -> bool {
     for i in 0..5 {
         for j in 0..5 {
-            if card[i][j].equals(previous) && (i == 4 || j == 4) {
-                return true
+            if !card[i][j].is_marked() {
+                break
+            }
+            if j == 4 { return true }
+        }
+
+        for j in 0..5 {
+            if !card[j][i].is_marked() {
+                break
+            }
+            if j == 4 { return true }
+        }
+    }
+    false
+}
+
+fn sum_unmarked(card: &BingoCard) -> u32 {
+    let mut sum = 0;
+
+    for row in card {
+        for cell in row {
+            match cell {
+                BingoCell::Open(x) => sum += *x,
+                BingoCell::Marked(_) => (),
             }
         }
     }
-    todo!()
+
+    sum
 }
 
 type BingoCard = [[BingoCell; 5]; 5];
@@ -81,14 +110,10 @@ impl BingoCell {
         }
     }
 
-    fn equals(&self, other: BingoCell) -> bool {
-        match other {
+    fn is_marked(&self) -> bool {
+        match self {
             BingoCell::Open(_) => false,
-            BingoCell::Marked(n) => match self {
-                BingoCell::Open(_) => false,
-                BingoCell::Marked(x) => *x == n,
-            },
+            BingoCell::Marked(_) => true,
         }
-        
     }
 }
