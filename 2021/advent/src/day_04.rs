@@ -34,7 +34,10 @@ pub fn f() {
         cards.push(card);
     }
 
+    let mut winners = std::collections::HashSet::<usize>::new();
+    let num_cards = cards.len();
     for draw in drawn_numbers {
+        let mut dumb_index = 0;
         for card in &mut cards {
             for i in 0..5 {
                 for j in 0..5 {
@@ -43,15 +46,18 @@ pub fn f() {
             }
             if has_bingo(card) {
                 println!("Bingo!\n{:?}", card);
+                winners.insert(dumb_index);
 
-                let sum = sum_unmarked(card);
-                println!("{} * {} = {}", sum, draw, sum*draw);
-                return
+                if winners.len() == num_cards {
+                    let sum = sum_unmarked(card);
+                    println!("let the wookie win");
+                    println!("{} * {} = {}", sum, draw, sum*draw);
+                    return
+                }
             }
+            dumb_index += 1;
         }
     }
-
-    println!("cards:\n{:?}", cards);
 }
 
 fn has_bingo(card: &BingoCard) -> bool {
@@ -90,7 +96,7 @@ fn sum_unmarked(card: &BingoCard) -> u32 {
 
 type BingoCard = [[BingoCell; 5]; 5];
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum BingoCell {
     Open(u32),
     Marked(u32),
