@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::cmp;
+use std::collections::HashMap;
 
 use super::input;
 
@@ -11,11 +11,8 @@ pub fn f() {
     for line in &input {
         let line_points = line_points(&line);
         for point in line_points {
-            if !point_count.contains_key(&point) {
-                point_count.insert(point, 1);
-            } else {
-                point_count.insert(point, 1 + *point_count.get(&point).unwrap());
-            }
+            let p = point_count.entry(point).or_insert(0);
+            *p += 1;
         }
     }
 
@@ -39,11 +36,11 @@ fn parse(s: &str) -> Line {
     let (startstr, endstr) = s.split_once(" -> ").unwrap();
     let start = startstr
         .split_once(",")
-        .map(|x| (x.0.parse().unwrap(), x.1.parse().unwrap()))
+        .map(|(x, y)| (x.parse().unwrap(), y.parse().unwrap()))
         .unwrap();
     let end = endstr
         .split_once(",")
-        .map(|x| (x.0.parse().unwrap(), x.1.parse().unwrap()))
+        .map(|(x, y)| (x.parse().unwrap(), y.parse().unwrap()))
         .unwrap();
     Line {
         start: start,
