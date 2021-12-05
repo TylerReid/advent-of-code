@@ -31,8 +31,8 @@ pub fn f() {
 
 #[derive(Debug)]
 struct Line {
-    start: (u32, u32),
-    end: (u32, u32),
+    start: (i32, i32),
+    end: (i32, i32),
 }
 
 fn parse(s: &str) -> Line {
@@ -51,32 +51,34 @@ fn parse(s: &str) -> Line {
     }
 }
 
-fn line_points(l: &Line) -> Vec<(u32, u32)> {
+fn line_points(l: &Line) -> Vec<(i32, i32)> {
     let mut points = Vec::new();
+    let start = l.start;
+    let end = l.end;
 
-    let x_equal = l.start.0 == l.end.0;
-    let y_equal = l.start.1 == l.end.1;
+    let dx: i32 = if start.0 < end.0 {
+        1
+    } else if start.0 > end.0 {
+        -1
+    } else {
+        0
+    };
 
-    if !x_equal && !y_equal {
-        return points;
+    let dy: i32 = if start.1 < end.1 {
+        1
+    } else if start.1 > end.1 {
+        -1
+    } else {
+        0
+    };
+
+    let mut current = start;
+    while current != end {
+        points.push(current);
+        current.0 += dx;
+        current.1 += dy;
     }
-
-    if x_equal {
-        let miny = cmp::min(l.start.1, l.end.1);
-        let maxy = cmp::max(l.start.1, l.end.1);
-
-        for p in miny..=maxy {
-            points.push((l.start.0, p));
-        }
-    }
-
-    if y_equal {
-        let minx = cmp::min(l.start.0, l.end.0);
-        let maxx = cmp::max(l.start.0, l.end.0);
-        for p in minx..=maxx {
-            points.push((p, l.start.1));
-        }
-    }
+    points.push(end);
 
     points
 }
