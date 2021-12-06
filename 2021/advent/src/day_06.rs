@@ -1,29 +1,35 @@
 pub fn f() {
-    let mut fishies: Vec<Fish> = std::fs::read_to_string("input/6")
+    let input: Vec<u8> = std::fs::read_to_string("input/6")
         .unwrap()
         .split(",")
-        .map(|x| x.parse::<Fish>().unwrap())
+        .map(|x| x.parse::<u8>().unwrap())
         .collect();
 
-    for _ in 0..80 {
-        let mut new_fish = Vec::<Fish>::new();
-        for fish in &mut fishies {
-            if let Some(new) = tick(fish) {
-                new_fish.push(new);
-            }
-        }
-        fishies.append(&mut new_fish);
+    let mut buckets: [usize; 9] = [
+        0,
+        input.iter().filter(|x| **x == 1).count(),
+        input.iter().filter(|x| **x == 2).count(),
+        input.iter().filter(|x| **x == 3).count(),
+        input.iter().filter(|x| **x == 4).count(),
+        input.iter().filter(|x| **x == 5).count(),
+        input.iter().filter(|x| **x == 6).count(),
+        0,
+        0,
+    ];
+
+    for _ in 0..256 {
+        tick(&mut buckets);
     }
-    println!("{}", fishies.len());
+    println!("{}", buckets.iter().sum::<usize>())
 }
 
-type Fish = i16;
+fn tick(buckets: &mut [usize; 9]) {
+    let ready_to_spawn = buckets[0];
 
-fn tick(fish: &mut Fish) -> Option<Fish> {
-    if *fish == 0 {
-        *fish = 6;
-        return Some(8);
+    for i in 0..8 {
+        buckets[i] = buckets[i+1];
     }
-    *fish -= 1;
-    None
+
+    buckets[6] += ready_to_spawn;
+    buckets[8] = ready_to_spawn;
 }
