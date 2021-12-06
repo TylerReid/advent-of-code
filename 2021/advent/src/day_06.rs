@@ -2,7 +2,7 @@ pub fn f() {
     let input: Vec<usize> = std::fs::read_to_string("input/6")
         .unwrap()
         .split(",")
-        .map(|x| x.parse::<usize>().unwrap())
+        .map(|x| x.parse().unwrap())
         .collect();
 
     let mut buckets = [0; 9];
