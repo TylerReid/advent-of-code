@@ -12,18 +12,29 @@ pub fn f() {
 fn dumb_n2_solution(positions: &Vec<i32>) {
     let mut lowest = (0, i32::MAX);
 
-    for (i, position) in positions.iter().enumerate() {
+    let min = *positions.iter().min().unwrap();
+    let max = *positions.iter().max().unwrap();
+
+    for position in min..=max {
         let mut cost = 0;
-        for (j, other) in positions.iter().enumerate() {
-            if i == j {
-                continue;
-            }
-            cost += (position - other).abs();
+        for other in positions {
+            cost += calc_cost((position - other).abs());
         }
         if cost < lowest.1 {
-            lowest = (*position, cost);
+            lowest = (position, cost);
         }
     }
 
     println!("{:?}", lowest);
+}
+
+// I think there is a way to do this without the loop
+// because this forms a trangle with area (n^2 / 2) + n/2
+// but I am derping on the integer math needed for this
+fn calc_cost(n: i32) -> i32 {
+    let mut total = 0;
+    for i in 0..=n {
+        total += i;
+    }
+    total
 }
