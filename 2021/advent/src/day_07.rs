@@ -18,7 +18,7 @@ fn dumb_n2_solution(positions: &Vec<i32>) {
     for position in min..=max {
         let mut cost = 0;
         for other in positions {
-            cost += calc_cost((position - other).abs());
+            cost += trangle_number((position - other).abs());
         }
         if cost < lowest.1 {
             lowest = (position, cost);
@@ -37,4 +37,10 @@ fn calc_cost(n: i32) -> i32 {
         total += i;
     }
     total
+}
+
+// :facepalm: copied from sajattack's solution 
+// when I tried this on my own I must have derped on typing it in and confused myself
+fn trangle_number(num: i32) -> i32 {
+    (num.pow(2) + num)/2
 }
