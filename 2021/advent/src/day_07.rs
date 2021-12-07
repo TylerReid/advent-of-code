@@ -18,7 +18,7 @@ fn dumb_n2_solution(positions: &[i32]) {
     for position in min..=max {
         let mut cost = 0;
         for other in positions {
-            cost += calc_cost((position - other).abs());
+            cost += trangle_number((position - other).abs());
         }
         if cost < lowest.1 {
             lowest = (position, cost);
