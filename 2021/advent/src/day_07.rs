@@ -18,7 +18,7 @@ fn dumb_n2_solution(positions: &[i32]) {
     for position in min..=max {
         let mut cost = 0;
         for other in positions {
-            cost += trangle_number((position - other).abs());
+            cost += calc_cost((position - other).abs());
         }
         if cost < lowest.1 {
             lowest = (position, cost);
@@ -32,11 +32,7 @@ fn dumb_n2_solution(positions: &[i32]) {
 // because this forms a trangle with area (n^2 / 2) + n/2
 // but I am derping on the integer math needed for this
 fn calc_cost(n: i32) -> i32 {
-    let mut total = 0;
-    for i in 0..=n {
-        total += i;
-    }
-    total
+    (0..=n).sum()
 }
 
 // :facepalm: copied from sajattack's solution 
