@@ -9,7 +9,7 @@ pub fn f() {
 }
 
 
-fn dumb_n2_solution(positions: &Vec<i32>) {
+fn dumb_n2_solution(positions: &[i32]) {
     let mut lowest = (0, i32::MAX);
 
     let min = *positions.iter().min().unwrap();
