@@ -1,4 +1,4 @@
-use std::{collections::HashMap, vec};
+use std::{collections::HashMap, error::Error, vec};
 
 use super::input;
 
@@ -68,15 +68,15 @@ fn deduce_output((input, output): &(Vec<String>, Vec<String>)) -> u32 {
         }
     }
 
-    println!("output {:#?}", output);
-    println!("map {:#?}", values);
+    let mut result = "".to_owned();
 
-    output
+    for derp in output
         .iter()
-        .map(|x| values.get(x).unwrap())
-        .sum::<u8>()
-        .try_into()
-        .unwrap()
+        .map(|x| dumb_extract_match(&values, x).to_string())
+    {
+        result.push_str(&derp)
+    }
+    result.parse().unwrap()
 }
 
 fn parse(s: &str) -> (Vec<String>, Vec<String>) {
@@ -126,4 +126,13 @@ fn overlap_count(a: &str, b: Option<String>) -> u8 {
             .unwrap();
     }
     0
+}
+
+fn dumb_extract_match(h: &HashMap<String, u8>, key: &str) -> u8 {
+    for (k, v) in h {
+        if k.chars().all(|x| key.contains(x)) && key.chars().all(|x| k.contains(x)) {
+            return *v;
+        }
+    }
+    panic!("not found {} {:#?}", key, h);
 }
