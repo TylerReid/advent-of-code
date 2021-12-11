@@ -3,12 +3,14 @@ use super::input;
 pub fn f() {
     let mut octos = input::read_parse(11, parse);
 
-    let mut num_flashes = 0;
-    for _ in 0..100 {
-        num_flashes += step(&mut octos);
-    }
+    for i in 1..i32::MAX {
+        let num_flashes = step(&mut octos);
 
-    println!("{}", num_flashes)
+        if num_flashes == 100 {
+            println!("{}", i);
+            return;
+        }
+    }
 }
 
 fn step(octos: &mut Vec<Vec<u16>>) -> u32 {
