@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
-mod day_10;
+mod day_11;
 mod input;
 
 fn main() {
-    day_10::f();
+    day_11::f();
 }
