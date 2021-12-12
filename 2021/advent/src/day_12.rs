@@ -26,25 +26,29 @@ pub fn f() {
 }
 
 fn traverse(caves: &HashMap<&str, Vec<&str>>) -> Vec<String> {
-    derp(caves, "start", "start").unwrap()
+    derp(caves, "start", "start", false).unwrap()
 }
 
-fn derp(caves: &HashMap<&str, Vec<&str>>, past_path: &str, current_position: &str) -> Option<Vec<String>> {
+fn derp(caves: &HashMap<&str, Vec<&str>>, past_path: &str, current_position: &str, double_dipped: bool) -> Option<Vec<String>> {
     if current_position == "end" {
-        // println!("found end {} {}", past_path, current_position);
         return Some(vec![past_path.to_string()]);
     }
     
     let next_moves = &caves[current_position];
-    // println!("past path {} current {}", past_path, current_position);
-    // println!("next {:?}", next_moves);
     let mut paths = Vec::new();
     for m in next_moves {
-        if m.chars().all(|x| x.is_lowercase()) && past_path.contains(*m) {
+        if m == &"start" {
             continue;
         }
+        let mut dd = double_dipped;
+        if m.chars().all(|x| x.is_lowercase()) && past_path.contains(*m) {
+            if double_dipped {
+                continue;
+            }
+            dd = true;
+        }
 
-        if let Some(p) = derp(caves, &format!("{},{}", past_path, m), m).as_mut() {
+        if let Some(p) = derp(caves, &format!("{},{}", past_path, m), m, dd).as_mut() {
             paths.append(p);
         }
     }
