@@ -4,11 +4,14 @@ pub fn f() {
     let input = std::fs::read_to_string("input/13").unwrap();
 
     let (p, f) = input.split_once("\n\n").unwrap();
-    let points = parse_points(p);
+    let mut points = parse_points(p);
     let folds = parse_folds(f);
 
-    let n = fold(points, &folds[0]);
-    println!("{}", n.len());
+    for f in folds.iter() {
+        points = fold(points, f);
+    }
+
+    print(&points);
 }
 
 fn fold(h: HashSet<(u16, u16)>, fold: &Fold) -> HashSet<(u16, u16)> {
@@ -55,6 +58,21 @@ fn parse_folds(s: &str) -> Vec<Fold> {
     }
 
     folds
+}
+
+fn print(h: &HashSet<(u16, u16)>) {
+    let y_max = h.iter().map(|(_, y)| y).max().unwrap();
+    let x_max = h.iter().map(|(x, _)| x).max().unwrap();
+    for y in 0..=*y_max {
+        for x in 0..=*x_max {
+            if h.contains(&(x, y)) {
+                print!("#");
+            } else {
+                print!(" ");
+            }
+        }
+        println!();
+    }
 }
 
 #[derive(Debug)]
