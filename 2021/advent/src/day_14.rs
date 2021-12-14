@@ -8,44 +8,66 @@ pub fn f() {
     let mut polymer = parse_polymer(t);
     let rules = parse_rules(r);
 
-    for _ in 0..10 {
-        polymer = step(&rules, polymer);
-    }
-
-    // slice group by is not in stable :(
-    let mut counts = HashMap::new();
-    for p in polymer {
-        if let Some(x) = counts.get_mut(&p) {
-            *x += 1;
+    let mut char_counts = HashMap::new();
+    for c in t.chars() {
+        if let Some(v) = char_counts.get_mut(&c) {
+            *v += 1;
         } else {
-            counts.insert(p, 1);
+            char_counts.insert(c, 1);
         }
     }
 
-    let mut c: Vec<(&char, &i32)> = counts.iter().collect();
-    c.sort_by(|a, b| a.1.cmp(b.1));
+    for _ in 0..40 {
+        polymer = step(&rules, &polymer, &mut char_counts);
+    }
 
-    println!("{:?}", c);
-    println!("{}", c.last().unwrap().1 - c.first().unwrap().1);
+    let mut c: Vec<u64> = char_counts.iter().map(|(_, x)| *x).collect();
+    c.sort_by(|a, b| a.cmp(b));
+
+    println!("{}", c.last().unwrap() - c.first().unwrap());
 }
 
 type Rules = HashMap<(char, char), char>;
-type Polymer = Vec<char>;
+type Polymer = HashMap<(char, char), u64>;
 
-fn step(r: &Rules, p: Polymer) -> Polymer {
-    let mut new_polymer = Vec::new();
-    new_polymer.push(p[0]);
-    for i in 1..p.len() {
-        if let Some(v) = r.get(&(p[i-1], p[i])) {
-            new_polymer.push(*v);
+fn step(r: &Rules, p: &Polymer, char_counts: &mut HashMap<char, u64>) -> Polymer {
+    let mut new_polymer = HashMap::new();
+
+    for (pair, new_char) in r {
+        if let Some(count) = p.get(pair) {
+            if let Some(char) = char_counts.get_mut(new_char) {
+                *char += count;
+            } else {
+                char_counts.insert(*new_char, *count);
+            }
+
+            if let Some(v) = new_polymer.get_mut(&(pair.0, *new_char)) {
+                *v += *count;
+            } else {
+                new_polymer.insert((pair.0, *new_char), *count);
+            }
+
+            if let Some(v) = new_polymer.get_mut(&(*new_char, pair.1)) {
+                *v += *count;
+            } else {
+                new_polymer.insert((*new_char, pair.1), *count);
+            }
         }
-        new_polymer.push(p[i]);
     }
     new_polymer
 }
 
 fn parse_polymer(s: &str) -> Polymer {
-    s.chars().collect()
+    let mut p = HashMap::new();
+    for w in s.chars().collect::<Vec<char>>().windows(2) {
+        let k = (w[0], w[1]);
+        if let Some(v) = p.get_mut(&k) {
+            *v += 1;
+        } else {
+            p.insert(k, 1);
+        }
+    }
+    p
 }
 
 fn parse_rules(s: &str) -> Rules {
