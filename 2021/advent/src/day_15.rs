@@ -3,15 +3,46 @@ use std::{cmp::Ordering, collections::BinaryHeap};
 use super::input;
 
 pub fn f() {
-    let input: Vec<usize> = std::fs::read_to_string("input/15")
+    let mut input: Vec<Vec<usize>> = std::fs::read_to_string("input/15")
         .unwrap()
-        .chars()
-        .filter(|c| *c != '\n')
-        .map(|c| c.to_string().parse().unwrap())
+        .lines()
+        .map(|s| s.chars().map(|c| c.to_string().parse().unwrap()).collect())
         .collect();
 
-    let stride: usize = 100; //todo sqrt of input len?
+    let original_stride: usize = 100;
+    let stride = original_stride * 5; //todo sqrt of input len?
     let length = stride * stride - 1;
+
+    for line in input.iter_mut() {
+        let mut new_costs = Vec::new();
+        for i in 1..9 {
+            for cost in line.iter() {
+                let c = (i + *cost) % 9;
+                new_costs.push(if c == 0 { 9 } else { c });
+            }
+        }
+        line.append(&mut new_costs);
+    }
+
+    let mut derp: Vec<Vec<usize>> = Vec::new();
+    for i in 0..5 {
+        for line in input.iter() {
+            let mut new_line = Vec::new();
+            for cost in line.iter().skip(i * original_stride) {
+                new_line.push(*cost);
+            }
+            derp.push(new_line);
+        }
+    }
+
+    let mut final_input = Vec::new();
+    for x in 0..stride {
+        for y in 0..stride {
+            final_input.push(derp[x][y]);
+        }
+    }
+
+    
 
     let mut nodes = Vec::new();
     for position in 0..=length {
@@ -20,28 +51,28 @@ pub fn f() {
         if let Some(v) = position.checked_sub(stride) {
             edges.push(Edge {
                 node: v,
-                cost: input[v],
+                cost: final_input[v],
             });
         }
         //bottom
         if position + stride < length {
             edges.push(Edge {
                 node: position + stride,
-                cost: input[position + stride],
+                cost: final_input[position + stride],
             });
         }
         //left
         if position % stride != 0 {
             edges.push(Edge {
                 node: position - 1,
-                cost: input[position - 1],
+                cost: final_input[position - 1],
             });
         }
         //right
         if position % stride != stride - 1 {
             edges.push(Edge {
                 node: position + 1,
-                cost: input[position + 1],
+                cost: final_input[position + 1],
             });
         }
 
