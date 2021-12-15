@@ -9,10 +9,11 @@ pub fn f() {
         .map(|s| s.chars().map(|c| c.to_string().parse().unwrap()).collect())
         .collect();
 
-    let original_stride: usize = 100;
+    let original_stride = 100;
     let stride = original_stride * 5; //todo sqrt of input len?
     let length = stride * stride - 1;
 
+    // expand the first tile off to the right enough so that the later loop can copy it after shifting
     for line in input.iter_mut() {
         let mut new_costs = Vec::new();
         for i in 1..9 {
@@ -23,8 +24,8 @@ pub fn f() {
         }
         line.append(&mut new_costs);
     }
-
-    let mut derp: Vec<Vec<usize>> = Vec::new();
+    // copy the input 5 times, each time shifting by one tile
+    let mut derp = Vec::new();
     for i in 0..5 {
         for line in input.iter() {
             let mut new_line = Vec::new();
@@ -41,8 +42,6 @@ pub fn f() {
             final_input.push(derp[x][y]);
         }
     }
-
-    
 
     let mut nodes = Vec::new();
     for position in 0..=length {
@@ -78,8 +77,6 @@ pub fn f() {
 
         nodes.push(edges);
     }
-
-    //println!("{:#?}", nodes);
 
     let cost = shortest_path(&nodes, 0, length);
 
