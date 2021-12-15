@@ -38,7 +38,7 @@ pub fn f() {
             });
         }
         //right
-        if position % stride != stride - 1 && position < length {
+        if position % stride != stride - 1 {
             edges.push(Edge {
                 node: position + 1,
                 cost: input[position + 1],
@@ -48,7 +48,7 @@ pub fn f() {
         nodes.push(edges);
     }
 
-    println!("{:#?}", nodes);
+    //println!("{:#?}", nodes);
 
     let cost = shortest_path(&nodes, 0, length);
 
