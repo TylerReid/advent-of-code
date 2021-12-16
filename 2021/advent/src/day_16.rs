@@ -29,14 +29,12 @@ struct Packet {
 }
 
 fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
-    println!("\n\nbits: {}", bits);
     let mut bits_read = 0;
     let version = slice_to_int(&bits[bits_read..3]);
     bits_read += 3;
     let type_id = slice_to_int(&bits[bits_read..bits_read + 3]);
     bits_read += 3;
-    println!("version {} type {}", version, type_id);
-    let mut result = 0;
+    let mut result = 1;
 
     let value = match type_id {
         4 => {
@@ -48,12 +46,10 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
         packet_type => {
             let length_type_id = bits[bits_read];
             bits_read += 1;
-            println!("length id: {}", length_type_id);
-            println!("remaining: {}", &bits[bits_read..bits.len()]);
+
             let subpackets = if length_type_id == false {
                 let subpacket_length = slice_to_int(&bits[bits_read..bits_read + 15]);
                 bits_read += 15;
-                println!("subpacket length: {}", subpacket_length);
                 let mut subpackets = Vec::new();
                 let read_until = bits_read + subpacket_length as usize;
                 while bits_read < read_until {
@@ -63,10 +59,8 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
                 }
                 subpackets
             } else {
-                println!("num packet bits {}", &bits[bits_read..bits_read + 11]);
                 let num_subpackets = slice_to_int(&bits[bits_read..bits_read + 11]);
                 bits_read += 11;
-                println!("num subpackets {}", num_subpackets);
                 let mut subpackets = Vec::new();
                 for _ in 0..num_subpackets {
                     let (subpacket, r) = parse_packet(&bits[bits_read..bits.len()]);
@@ -76,33 +70,22 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
                 subpackets
             };
 
-            match packet_type {
-                0 => {
-                    result = subpackets.iter().map(|x| x.result).sum();
-                },
+            result = match packet_type {
+                0 => subpackets.iter().map(|x| x.result).sum(),
                 1 => {
-                    result = 1;
                     for p in &subpackets {
                         result *= p.result;
                     }
-                },
-                2 => {
-                    result = subpackets.iter().map(|x| x.result).min().unwrap();
-                },
-                3 => {
-                    result = subpackets.iter().map(|x| x.result).max().unwrap();
-                },
-                5 => {
-                    result = if subpackets[0].result > subpackets[1].result { 1 } else { 0 };
-                },
-                6 => {
-                    result = if subpackets[0].result < subpackets[1].result { 1 } else { 0 };
-                },
-                7 => {
-                    result = if subpackets[0].result == subpackets[1].result { 1 } else { 0 };
-                },
+                    result
+                }
+                2 => subpackets.iter().map(|x| x.result).min().unwrap(),
+                3 => subpackets.iter().map(|x| x.result).max().unwrap(),
+                5 => if subpackets[0].result > subpackets[1].result { 1 } else { 0 }
+                6 => if subpackets[0].result < subpackets[1].result { 1 } else { 0 }
+                7 => if subpackets[0].result == subpackets[1].result { 1 } else { 0 }
+
                 _ => panic!(),
-            }
+            };
 
             Value::InnerValue(subpackets)
         }
