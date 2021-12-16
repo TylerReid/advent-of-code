@@ -1,6 +1,5 @@
-extern crate hex;
+use hex::decode;
 use bitvec::prelude::*;
-use std::rc::Rc;
 
 pub fn f() {
     let input = std::fs::read_to_string("input/16").unwrap();
@@ -18,7 +17,7 @@ pub fn f() {
 #[derive(Debug)]
 enum Value {
     Literal(u64),
-    InnerValue(Vec<Packet>),
+    SubPackets(Vec<Packet>),
 }
 
 #[derive(Debug)]
@@ -87,15 +86,15 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
                 _ => panic!(),
             };
 
-            Value::InnerValue(subpackets)
+            Value::SubPackets(subpackets)
         }
     };
 
     (
         Packet {
-            version: version,
-            value: value,
-            result: result,
+            version,
+            value,
+            result,
         },
         bits_read,
     )
@@ -103,7 +102,6 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
 
 // this seems silly, I am probably missing something in bitvec to do this
 fn slice_to_int(slice: &BitSlice<Msb0, u8>) -> u64 {
-    //todo make this generic on int type?
     let mut result = 0;
 
     for bit in slice.to_bitvec() {
@@ -140,7 +138,7 @@ fn slice_to_literal(slice: &BitSlice<Msb0, u8>) -> (u64, usize) {
 
 fn sum_version_numbers(packet: &Packet) -> u64 {
     let mut result = packet.version;
-    if let Value::InnerValue(sub_packets) = &packet.value {
+    if let Value::SubPackets(sub_packets) = &packet.value {
         for sub_packet in sub_packets {
             result += sum_version_numbers(sub_packet);
         }
