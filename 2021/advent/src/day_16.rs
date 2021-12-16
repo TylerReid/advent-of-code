@@ -12,6 +12,7 @@ pub fn f() {
     println!("{:?}", packet);
 
     println!("sum: {}", sum_version_numbers(&packet));
+    println!("result: {}", packet.result);
 }
 
 #[derive(Debug)]
@@ -24,6 +25,7 @@ enum Value {
 struct Packet {
     version: u64,
     value: Value,
+    result: u64,
 }
 
 fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
@@ -31,23 +33,25 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
     let mut bits_read = 0;
     let version = slice_to_int(&bits[bits_read..3]);
     bits_read += 3;
-    let type_id = slice_to_int(&bits[bits_read..bits_read+3]);
+    let type_id = slice_to_int(&bits[bits_read..bits_read + 3]);
     bits_read += 3;
     println!("version {} type {}", version, type_id);
+    let mut result = 0;
 
     let value = match type_id {
         4 => {
             let (v, b) = slice_to_literal(&bits[bits_read..bits.len()]);
             bits_read += b;
+            result = v;
             Value::Literal(v)
-        },
-        _ => {
+        }
+        packet_type => {
             let length_type_id = bits[bits_read];
             bits_read += 1;
             println!("length id: {}", length_type_id);
             println!("remaining: {}", &bits[bits_read..bits.len()]);
-            let value = if length_type_id == false {
-                let subpacket_length = slice_to_int(&bits[bits_read..bits_read+15]);
+            let subpackets = if length_type_id == false {
+                let subpacket_length = slice_to_int(&bits[bits_read..bits_read + 15]);
                 bits_read += 15;
                 println!("subpacket length: {}", subpacket_length);
                 let mut subpackets = Vec::new();
@@ -57,10 +61,10 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
                     bits_read += r;
                     subpackets.push(subpacket);
                 }
-                Value::InnerValue(subpackets)
+                subpackets
             } else {
-                println!("num packet bits {}", &bits[bits_read..bits_read+11]);
-                let num_subpackets = slice_to_int(&bits[bits_read..bits_read+11]);
+                println!("num packet bits {}", &bits[bits_read..bits_read + 11]);
+                let num_subpackets = slice_to_int(&bits[bits_read..bits_read + 11]);
                 bits_read += 11;
                 println!("num subpackets {}", num_subpackets);
                 let mut subpackets = Vec::new();
@@ -69,10 +73,38 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
                     bits_read += r;
                     subpackets.push(subpacket);
                 }
-                Value::InnerValue(subpackets)
+                subpackets
             };
 
-            value
+            match packet_type {
+                0 => {
+                    result = subpackets.iter().map(|x| x.result).sum();
+                },
+                1 => {
+                    result = 1;
+                    for p in &subpackets {
+                        result *= p.result;
+                    }
+                },
+                2 => {
+                    result = subpackets.iter().map(|x| x.result).min().unwrap();
+                },
+                3 => {
+                    result = subpackets.iter().map(|x| x.result).max().unwrap();
+                },
+                5 => {
+                    result = if subpackets[0].result > subpackets[1].result { 1 } else { 0 };
+                },
+                6 => {
+                    result = if subpackets[0].result < subpackets[1].result { 1 } else { 0 };
+                },
+                7 => {
+                    result = if subpackets[0].result == subpackets[1].result { 1 } else { 0 };
+                },
+                _ => panic!(),
+            }
+
+            Value::InnerValue(subpackets)
         }
     };
 
@@ -80,6 +112,7 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
         Packet {
             version: version,
             value: value,
+            result: result,
         },
         bits_read,
     )
