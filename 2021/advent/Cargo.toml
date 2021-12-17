@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 hex = "0.4"
 bitvec = "0.20"
+regex = "1.1.9"
