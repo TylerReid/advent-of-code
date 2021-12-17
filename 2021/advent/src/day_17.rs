@@ -3,10 +3,6 @@ use std::ops::Range;
 
 pub fn f() {
     let target = parse_target(&std::fs::read_to_string("input/17").unwrap());
-
-    println!("{:?}", target);
-    println!("{:?}", fire(&target, (6, 4)));
-
     fire_ze_missles(&target);
 }
 
@@ -15,7 +11,6 @@ fn parse_target(s: &str) -> (Range<i32>, Range<i32>) {
         Regex::new("target area: x=(-?[0-9]+)\\.\\.(-?[0-9]+), y=(-?[0-9]+)\\.\\.(-?[0-9]+)")
             .unwrap();
     let captures = regex.captures(s).unwrap();
-    println!("{:?}", captures);
 
     let x_start = captures.get(1).unwrap().as_str().parse().unwrap();
     let x_end = captures.get(2).unwrap().as_str().parse::<i32>().unwrap() + 1;
@@ -58,23 +53,25 @@ fn fire(target: &(Range<i32>, Range<i32>), (mut dx, mut dy): (i32, i32)) -> Opti
     let mut position = (0, 0);
     let mut max_y = 0;
     let og_velocity = (dx, dy);
-    for _ in 0..1000 {
+    loop {
         let result = step((dx, dy), position);
         position = result.1;
         dx = result.0 .0;
         dy = result.0 .1;
 
         if target.0.end < position.0 || target.1.start > position.1 {
-            return None
+            return None;
         }
 
         if position.1 > max_y {
             max_y = position.1;
         }
         if target.0.contains(&position.0) && target.1.contains(&position.1) {
-            println!("found hit in {:?} with velocity {:?} and max {}", position, og_velocity, max_y);
+            println!(
+                "found hit in {:?} with velocity {:?} and max {}",
+                position, og_velocity, max_y
+            );
             return Some(max_y);
         }
     }
-    None
 }
