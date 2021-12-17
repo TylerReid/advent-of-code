@@ -71,12 +71,7 @@ fn parse_packet(bits: &BitSlice<Msb0, u8>) -> (Packet, usize) {
 
             result = match packet_type {
                 0 => subpackets.iter().map(|x| x.result).sum(),
-                1 => {
-                    for p in &subpackets {
-                        result *= p.result;
-                    }
-                    result
-                }
+                1 => subpackets.iter().fold(1, |acc, x| acc * x.result),
                 2 => subpackets.iter().map(|x| x.result).min().unwrap(),
                 3 => subpackets.iter().map(|x| x.result).max().unwrap(),
                 5 => if subpackets[0].result > subpackets[1].result { 1 } else { 0 }
@@ -106,7 +101,7 @@ fn slice_to_int(slice: &BitSlice<Msb0, u8>) -> u64 {
 
     for bit in slice.to_bitvec() {
         result <<= 1;
-        result |= if bit { 1 } else { 0 }
+        result |= bit as u64
     }
 
     result
@@ -127,7 +122,7 @@ fn slice_to_literal(slice: &BitSlice<Msb0, u8>) -> (u64, usize) {
                 continue;
             }
             result <<= 1;
-            result |= if b == true { 1 } else { 0 };
+            result |= (b == true) as u64;
         }
         if exit {
             return (result, bits_read);
