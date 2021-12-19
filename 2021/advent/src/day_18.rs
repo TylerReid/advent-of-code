@@ -3,24 +3,24 @@ use super::input;
 pub fn f() {
     let input = input::read_parse(18, parse);
 
-    let mut number = input[0].clone();
-
-    for n in input.iter().skip(1) {
-        number = add_numbers(&number, n);
-        while let Some(n) = simplify(&number) {
-            number = n;
-            print_numbers(&number);
+    let mut max_mag = 0;
+    for a in 0..input.len() {
+        for b in 0..input.len() {
+            if a == b {
+                continue;
+            }
+            let mut number = add_numbers(&input[a], &input[b]);
+            while let Some(n) = simplify(&number) {
+                number = n;
+            }
+            while number.len() > 1 {
+                calc_magnitude(&mut number);
+            }
+            max_mag = max_mag.max(number[0].value);
         }
-        //print_numbers(&number);
     }
 
-    //print_numbers(&number);
-
-    while number.len() > 1 {
-        calc_magnitude(&mut number);
-    }
-
-    println!("{}", number[0].value);
+    println!("{}", max_mag);
 }
 
 #[derive(Debug, Clone, Copy)]
