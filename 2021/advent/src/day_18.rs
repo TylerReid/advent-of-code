@@ -17,7 +17,7 @@ pub fn f() {
     //print_numbers(&number);
 
     while number.len() > 1 {
-        m(&mut number);
+        calc_magnitude(&mut number);
     }
 
     println!("{}", number[0].value);
