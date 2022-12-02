@@ -1,8 +1,8 @@
 namespace Advent;
 
-public abstract class AdventDay
+public interface AdventDay
 {
-    public abstract int Day { get; }
+    int Day { get; }
 
     public void DoIt() 
     {
@@ -13,8 +13,8 @@ public abstract class AdventDay
         if (problem != "") PartTwo(problem);
     }
 
-    protected abstract void PartOne(string input);
-    protected virtual void PartTwo(string input){}
+    void PartOne(string input);
+    void PartTwo(string input){}
 
     private (string sample, string problem) GetInput(string day)
     {

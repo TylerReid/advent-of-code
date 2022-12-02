@@ -2,12 +2,12 @@ namespace Advent;
 
 public class One : AdventDay
 {
-    public override int Day => 1;
+    public int Day => 1;
 
-    protected override void PartOne(string input) 
+    public void PartOne(string input) 
         => Console.WriteLine(FindMaxCalories(input));
 
-    protected override void PartTwo(string input) 
+    public void PartTwo(string input) 
         => Console.WriteLine(TopN(input, 3));
 
     private long FindMaxCalories(string input) => 

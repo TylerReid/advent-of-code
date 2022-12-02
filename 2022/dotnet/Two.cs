@@ -2,9 +2,9 @@ namespace Advent;
 
 public class Two : AdventDay
 {
-    public override int Day => 2;
+    public int Day => 2;
 
-    protected override void PartOne(string input)
+    public void PartOne(string input)
     {
         var score = 0;
         foreach (var round in input.Split("\n"))
@@ -16,7 +16,7 @@ public class Two : AdventDay
         Console.WriteLine(score);
     }
 
-    protected override void PartTwo(string input)
+    public void PartTwo(string input)
     {
         var score = 0;
         foreach (var round in input.Split("\n"))
