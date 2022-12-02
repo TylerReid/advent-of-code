@@ -8,7 +8,9 @@ public abstract class AdventDay
     {
         var (sample, problem) = GetInput($"{Day:D2}");
         PartOne(sample);
-        PartTwo(problem);
+        if (problem != "") PartOne(problem);
+        PartTwo(sample);
+        if (problem != "") PartTwo(problem);
     }
 
     protected abstract void PartOne(string input);
