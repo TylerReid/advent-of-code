@@ -1,17 +1,14 @@
-namespace advent;
+namespace Advent;
 
-public class One
+public class One : AdventDay
 {
-    public void DoIt()
-    {
-        var (sample, problem) = Input.GetInput("01");
+    public override int Day => 1;
 
-        Console.WriteLine(FindMaxCalories(sample!));
-        Console.WriteLine(FindMaxCalories(problem!));
+    protected override void PartOne(string input) 
+        => Console.WriteLine(FindMaxCalories(input));
 
-        Console.WriteLine(TopN(sample!, 3));
-        Console.WriteLine(TopN(problem!, 3));
-    }
+    protected override void PartTwo(string input) 
+        => Console.WriteLine(TopN(input, 3));
 
     private long FindMaxCalories(string input) => 
         input.Split("\n\n")
