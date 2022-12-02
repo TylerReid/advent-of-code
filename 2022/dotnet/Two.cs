@@ -44,21 +44,18 @@ public class Two : AdventDay
             string x => throw new Exception($"unknown code {x}")
         };
 
-        var mine = needed switch {
-            Result.Win => theirs switch {
-                Choice.Rock => Choice.Paper,
-                Choice.Paper => Choice.Scissors,
-                Choice.Scissors => Choice.Rock,
-                _ => throw new Exception(),
-            },
-            Result.Lose => theirs switch {
-                Choice.Rock => Choice.Scissors,
-                Choice.Paper => Choice.Rock,
-                Choice.Scissors => Choice.Paper,
-                _ => throw new Exception(),
-            },
-            Result.Draw => theirs,
-            _ => throw new Exception(),
+        var mine = (needed, theirs) switch {
+            (Result.Win, Choice.Rock) => Choice.Paper,
+            (Result.Win, Choice.Paper) => Choice.Scissors,
+            (Result.Win, Choice.Scissors) => Choice.Rock,
+
+            (Result.Lose, Choice.Rock) => Choice.Scissors,
+            (Result.Lose, Choice.Paper) => Choice.Rock,
+            (Result.Lose, Choice.Scissors) => Choice.Paper,
+
+            (Result.Draw, Choice x) => x,
+
+            _ => throw new Exception($"Invalid combo {needed} {theirs}"),
         };
 
         return (theirs, mine);
@@ -66,43 +63,32 @@ public class Two : AdventDay
 
     (Choice theirs, Choice mine) Parse(string input)
     {
+        Choice parse(string s) => s switch {
+            "A" or "X" => Choice.Rock,
+            "B" or "Y" => Choice.Paper,
+            "C" or "Z" => Choice.Scissors,
+            string x => throw new Exception($"unknown code {x}"),
+        };
+
         var parts = input.Split(" ");
-        var theirs = parts[0] switch {
-            "A" => Choice.Rock,
-            "B" => Choice.Paper,
-            "C" => Choice.Scissors,
-            string x => throw new Exception($"unknown code {x}")
-        };
-        var mine = parts[1] switch {
-            "X" => Choice.Rock,
-            "Y" => Choice.Paper,
-            "Z" => Choice.Scissors,
-            string x => throw new Exception($"unknown code {x}")
-        };
-        return (theirs, mine);
+        return (parse(parts[0]), parse(parts[1]));
     }
 
-    Result Play(Choice mine, Choice theirs) => mine switch
+    Result Play(Choice mine, Choice theirs) => (mine, theirs) switch 
     {
-        Choice.Rock => theirs switch {
-            Choice.Rock => Result.Draw,
-            Choice.Paper => Result.Lose,
-            Choice.Scissors => Result.Win,
-            _ => throw new Exception(),
-        },
-        Choice.Paper => theirs switch {
-            Choice.Rock => Result.Win,
-            Choice.Paper => Result.Draw,
-            Choice.Scissors => Result.Lose,
-            _ => throw new Exception(),
-        },
-        Choice.Scissors => theirs switch {
-            Choice.Rock => Result.Lose,
-            Choice.Paper => Result.Win,
-            Choice.Scissors => Result.Draw,
-            _ => throw new Exception(),
-        },
-        _ => throw new Exception(),
+        (Choice.Rock, Choice.Rock) => Result.Draw,
+        (Choice.Rock, Choice.Paper) => Result.Lose,
+        (Choice.Rock, Choice.Scissors) => Result.Win,
+
+        (Choice.Paper, Choice.Rock) => Result.Win,
+        (Choice.Paper, Choice.Paper) => Result.Draw,
+        (Choice.Paper, Choice.Scissors) => Result.Lose,
+
+        (Choice.Scissors, Choice.Rock) => Result.Lose,
+        (Choice.Scissors, Choice.Paper) => Result.Win,
+        (Choice.Scissors, Choice.Scissors) => Result.Draw,
+
+        _ => throw new Exception($"invalid combination ({mine}, {theirs})"),
     };
 
     int Score(Choice choice) => choice switch {
