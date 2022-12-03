@@ -3,11 +3,16 @@ namespace Advent;
 public class Two : AdventDay
 {
     public int Day => 2;
+    public string Example => """
+    A Y
+    B X
+    C Z
+    """;
 
     public void PartOne(string input)
     {
         var score = 0;
-        foreach (var round in input.Split("\n"))
+        foreach (var round in input.Split("\n").Where(x => x != ""))
         {
             var (theirs, mine) = Parse(round);
             score += Score(Play(mine, theirs));
@@ -19,7 +24,7 @@ public class Two : AdventDay
     public void PartTwo(string input)
     {
         var score = 0;
-        foreach (var round in input.Split("\n"))
+        foreach (var round in input.Split("\n").Where(x => x != ""))
         {
             var (theirs, mine) = ParsePartTwo(round);
             score += Score(Play(mine, theirs));
