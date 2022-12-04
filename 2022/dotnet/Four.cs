@@ -8,7 +8,7 @@ public class Four : AdventDay
     {
         var derp = input.SplitLines()
             .Select(x => x.SplitOnce(","))
-            .Select(x => (ExtractRanges(x.Item1), ExtractRanges(x.Item2)))
+            .Select(x => (ExtractRanges(x.a), ExtractRanges(x.b)))
             .Where(x => x.Item1.IsSubsetOf(x.Item2) || x.Item2.IsSubsetOf(x.Item1))
             .Count();
 
@@ -28,8 +28,8 @@ public class Four : AdventDay
 
     private HashSet<int> ExtractRanges(string s)
     {
-        var split = s.SplitOnce("-");
-        var (start, end) = (int.Parse(split.Item1), int.Parse(split.Item2));
+        var (a, b) = s.SplitOnce("-");
+        var (start, end) = (int.Parse(a), int.Parse(b));
         return Enumerable.Range(start, end - start + 1).ToHashSet();
     }
 }
