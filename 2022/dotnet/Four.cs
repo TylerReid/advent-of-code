@@ -20,7 +20,7 @@ public class Four : AdventDay
         var derp = input.SplitLines()
             .Select(x => x.SplitOnce(","))
             .Select(x => (ExtractRanges(x.Item1), ExtractRanges(x.Item2)))
-            .Where(x => x.Item1.Intersect(x.Item2).Count() > 0 || x.Item2.Intersect(x.Item1).Count() > 0)
+            .Where(x => x.Item1.Intersect(x.Item2).Count() > 0)
             .Count();
 
         Console.WriteLine(derp);
