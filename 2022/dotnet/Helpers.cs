@@ -8,4 +8,6 @@ public static class Helpers
         var a = s.Split(sep);
         return (a[0], a[1]);
     }
+
+    public static IEnumerable<(int index, T item)> Enumerate<T>(this IEnumerable<T> source) => source.Select((item, index) => (index, item));
 }
