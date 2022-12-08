@@ -53,7 +53,6 @@ public class Eight : AdventDay
         {
             var tree = forest[pos.x + i][pos.y];
             a += 1;
-
             if (tree >= treeHouseHeight) break;
         }
 
@@ -61,7 +60,7 @@ public class Eight : AdventDay
         for (var i = 1; pos.x - i >= 0; i++)
         {
             var tree = forest[pos.x - i][pos.y];
-                b += 1;
+            b += 1;
             if (tree >= treeHouseHeight) break;
         }
 
