@@ -28,18 +28,20 @@ public class Nine : AdventDay
         foreach (var move in moves)
         {
             rope[0] = (rope[0].x + move.x, rope[0].y + move.y);
-
-            for (var i = 1; i < rope.Length; i++)
+            while (true)
             {
-                //todo remove double call
-                while (rope[i] != MoveCloser(rope[i - 1], rope[i]))
+                var before = ((int, int)[])rope.Clone();
+                for (var i = 1; i < rope.Length; i++)
                 {
                     rope[i] = MoveCloser(rope[i - 1], rope[i]);
                     if (i == rope.Length - 1)
                     {
                         tailVisited.Add(rope[i]);
                     }
-                    
+                }
+                if (rope.SequenceEqual(before))
+                {
+                    break;
                 }
             }
         }
