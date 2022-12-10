@@ -7,25 +7,18 @@ public class Ten : AdventDay
     public void PartOne(string input)
     {
         var instructions = ParseInstructions(input);
-        var cpu = new Cpu();
+        var cpu = new Cpu { Instructions = new Queue<Instruction>(instructions) };
 
         var sum = 0;
-        foreach (var (i, ins) in instructions.Enumerate())
+        cpu.PerCycleAction += (Cpu c) => 
         {
-            cpu.StartInstruction(ins);
             if (cpu.Cycle == 20 || (cpu.Cycle - 20) % 40 == 0)
             {
                 sum += cpu.X * cpu.Cycle;
             }
-            if (ins is Noop) continue; //eww
-            cpu.DoInstruction(ins);
-            if (cpu.Cycle == 20 || (cpu.Cycle - 20) % 40 == 0)
-            {
-                sum += cpu.X * cpu.Cycle;
-            }
+        };
 
-            cpu.EndInstruction(ins);
-        }
+        cpu.Run();
 
         Console.WriteLine(sum);
     }
@@ -34,6 +27,33 @@ public class Ten : AdventDay
     {
         public int X { get; set; } = 1;
         public int Cycle { get; set; }
+        public required Queue<Instruction> Instructions { get; set; }
+        public Action<Cpu> PerCycleAction { get; set; } = (x) => {};
+
+        public void Run()
+        {
+            while (Instructions.TryDequeue(out var ins))
+            {
+                if (ins is Noop)
+                {
+                    IncrCycle();
+                    continue;
+                }
+                if (ins is AddX add)
+                {
+                    IncrCycle();
+                    IncrCycle();
+                    X += add.Value;
+                    continue;
+                }
+            }
+        }
+
+        private void IncrCycle()
+        {
+            Cycle++;
+            PerCycleAction(this);
+        }
 
         public void StartInstruction(Instruction ins) => Cycle++;
         public void DoInstruction(Instruction ins)
