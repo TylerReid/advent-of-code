@@ -99,22 +99,6 @@ public class Ten : AdventDay
             Cycle++;
             PerCycleAction(this);
         }
-
-        public void StartInstruction(Instruction ins) => Cycle++;
-        public void DoInstruction(Instruction ins)
-        {
-            if (ins is AddX add)
-            {
-                Cycle++;
-            }
-        }
-        public void EndInstruction(Instruction ins)
-        {
-            if (ins is AddX add)
-            {
-                X += add.Value;
-            }
-        }
     }
 
     class Instruction {}
