@@ -7,20 +7,65 @@ public class Ten : AdventDay
     public void PartOne(string input)
     {
         var instructions = ParseInstructions(input);
-        var cpu = new Cpu { Instructions = new Queue<Instruction>(instructions) };
-
         var sum = 0;
-        cpu.PerCycleAction += (Cpu c) => 
-        {
-            if (cpu.Cycle == 20 || (cpu.Cycle - 20) % 40 == 0)
+        var cpu = new Cpu
+        { 
+            Instructions = new Queue<Instruction>(instructions),
+            PerCycleAction = (c) => 
             {
-                sum += cpu.X * cpu.Cycle;
+                if (c.Cycle == 20 || (c.Cycle - 20) % 40 == 0)
+                {
+                    sum += c.X * c.Cycle;
+                }
             }
+        };
+        cpu.Run();
+        Console.WriteLine(sum);
+    }
+
+    public void PartTwo(string input)
+    {
+        var instructions = ParseInstructions(input);
+        var monitor = new Monitor();
+        var cpu = new Cpu 
+        {
+            Instructions = new Queue<Instruction>(instructions),
+            PerCycleAction = (c) => 
+            {
+                monitor.Buffer(c);
+            },
         };
 
         cpu.Run();
+        monitor.Draw();
+    }
 
-        Console.WriteLine(sum);
+    class Monitor
+    {
+        private List<char> _pixels = new();
+
+        public void Buffer(Cpu cpu)
+        {
+            var location = _pixels.Count() % 40;
+            if (location >= cpu.X - 1 && location <= cpu.X + 1)
+            {
+                _pixels.Add('#');
+            }
+            else
+            {
+                _pixels.Add('.');
+            }
+        }
+
+        public void Draw()
+        {
+            foreach (var (i, p) in _pixels.Enumerate())
+            {
+                Console.Write(p);
+                if ((i + 1) % 40 == 0) Console.WriteLine();
+            }
+            Console.WriteLine();
+        }
     }
 
     class Cpu
