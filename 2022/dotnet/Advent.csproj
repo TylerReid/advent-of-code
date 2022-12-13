@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Include="System.Text.Json" />
+    <Using Include="Newtonsoft.Json" />
     <Using Include="System.Text.RegularExpressions" />
   </ItemGroup>
 
