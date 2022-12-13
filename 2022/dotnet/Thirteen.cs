@@ -32,20 +32,13 @@ public class Thirteen : AdventDay
         var dividerTwo = new JArray(new JArray(new JValue(6L)));
         data.Add(dividerOne);
         data.Add(dividerTwo);
-        var sorted = data.OrderBy(x => x, new PacketComparer()).ToList();
+        var sorted = data
+            .OrderBy(x => x, Comparer<dynamic>.Create((x, y) => IsInOrder(x, y) ? -1 : 1))
+            .ToList();
         Console.WriteLine((sorted.IndexOf(dividerOne) + 1) * (sorted.IndexOf(dividerTwo) + 1));
     }
 
-    class PacketComparer : Comparer<dynamic>
-    {
-        public override int Compare(dynamic? x, dynamic? y)
-        {
-            var inOrder = Thirteen.IsInOrder(x, y);
-            return inOrder ? -1 : 1;
-        }
-    }
-
-    static bool? IsInOrder(dynamic left, dynamic right)
+    bool? IsInOrder(dynamic left, dynamic right)
     {
         DebugWrite($"Compare {JsonConvert.SerializeObject(left)} {JsonConvert.SerializeObject(right)}");
         if (left is JValue leftValue && leftValue.Value is long leftInt
@@ -109,8 +102,8 @@ public class Thirteen : AdventDay
         .Select(x => JsonConvert.DeserializeObject(x)!)
         .ToList();
 
-    static bool Debug = false;
-    static void DebugWrite(string s)
+    bool Debug = false;
+    void DebugWrite(string s)
     {
         if (Debug)
         {
