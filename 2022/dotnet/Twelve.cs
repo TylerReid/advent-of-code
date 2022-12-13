@@ -8,138 +8,155 @@ public class Twelve : AdventDay
 
     public void PartOne(string input)
     {
-        Derp = int.MaxValue;
-        var walkedPath = new WalkedPath
-        {
-            Start = FindMarker(input, 'S'),
-            End = FindMarker(input, 'E'),
-            Path = new List<(int x, int y)> { FindMarker(input, 'S') },
-            Map = Parse(input),
-        };
-
-        var paths = GetWalkedPaths(walkedPath);
-
-        var best = paths.OrderBy(x => x.Path.Count())
-            .First();
-
-        //Console.WriteLine(JsonConvert.SerializeObject(best, Formatting.Indented));
-        Console.WriteLine(best.Path.Count() - 1);
+        var data = Parse(input);
+        var start = data.SelectMany(x => x).Single(x => x.IsStart);
+        Console.WriteLine(DoDijkstra(data, start));
     }
 
-    List<WalkedPath> GetWalkedPaths(WalkedPath start)
+    public void PartTwo(string input)
     {
-        var paths = new List<WalkedPath>();
-        foreach ((int x, int y) next in PossibleSteps(start.Start))
-        if (start.CanWalk(start.Start, next) && TryWalkPath(start, next, out var p))
+        var data = Parse(input);
+        void Reset()
         {
-            paths.AddRange(p);
-        }
-        return paths;
-    }
-
-    private static int Derp = int.MaxValue;
-    bool TryWalkPath(WalkedPath path, (int x, int y) next, out List<WalkedPath> paths)
-    {
-        if (path.Path.Contains(next) || path.Path.Count > Derp)
-        {
-            paths = new();
-            return false;
-        }
-        if (next == path.End)
-        {
-            Derp = Derp > path.Path.Count() ? path.Path.Count() : Derp;
-            paths = new List<WalkedPath>
+            foreach (var n in data!.SelectMany(x => x))
             {
-                path.MakeClone().WithStep(next),
-            };
-            return true;
-        }
-
-        var previous = path.Path.Last();
-        paths = new();
-        foreach ((int x, int y) candidate in PossibleSteps(next))
-        {
-            if (candidate == previous || !path.CanWalk(next, candidate)) continue;
-
-            var nextPath = path.MakeClone().WithStep(next);
-            if (TryWalkPath(nextPath, candidate, out var newPaths))
-            {
-                paths.AddRange(newPaths);
+                n.ComeFrom = null;
+                n.Distance = long.MaxValue;
             }
         }
-        return paths.Any();
+
+        var min = long.MaxValue;
+        foreach (var node in data.SelectMany(x => x).Where(x => x.Level == 1))
+        {
+            Reset();
+            node.Distance = 0;
+            var distance = DoDijkstra(data, node);
+            if (distance < min)
+            {
+                min = distance;
+            }
+        }
+        Console.WriteLine(min);
     }
 
-    List<List<int>> Parse(string input)
+    long DoDijkstra(List<List<Node>> data, Node start, bool printDiagram = false)
     {
-        var data = new List<List<int>>();
-        foreach (var line in input.SplitLines())
+        var end = data.SelectMany(x => x).Where(x => x.IsEnd).Single();
+        foreach (var (i, line) in data.Enumerate())
         {
-            data.Add(line.ToCharArray()
-                .Select(x => (int)x)
-                .Select(x => x == 83 ? (int)'a' : x)
-                .Select(x => x == 69 ? (int)'z' : x)
-                .Select(x => x - 96)
-                .ToList()
-            );
+            foreach (var (j, node) in line.Enumerate())
+            {
+                node.Paths = PossibleSteps(data, (i, j));
+            }
+        }
+
+        var nodes = new List<Node> { start };
+        var considered = new HashSet<Node>();
+
+        while (nodes.Any())
+        {
+            var current = nodes.First();
+
+            if (current == end)
+            {
+                break;
+            }
+
+            foreach (var neighbor in current.Paths.Where(x => !considered.Contains(x)))
+            {
+                if (neighbor.Distance > (current.Distance + 1))
+                {
+                    checked {
+                        neighbor.Distance = current.Distance + 1;
+                    }
+                    neighbor.ComeFrom = current;
+                    nodes.Add(neighbor);
+                }
+            }
+
+            nodes.Remove(current);
+            considered.Add(current);
+            nodes = nodes.OrderBy(x => x.Distance).ToList();
+        }
+
+        if (printDiagram)
+        {
+            var path = new List<Node>();
+            var n = end;
+            while (n?.ComeFrom != null)
+            {
+                path.Add(n);
+                n = n.ComeFrom;
+            }
+
+            for (var x = 0; x < data.Count(); x++)
+            for (var y = 0; y < data.First().Count(); y++)
+            {
+                if (start.Position == (x, y))
+                {
+                    Console.Write('S');
+                }
+                else if (end.Position == (x, y))
+                {
+                    Console.Write('E');
+                }
+                else if (path.Any(derp => derp.Position == (x, y)))
+                {
+                    Console.Write('#');
+                }
+                else
+                {
+                    Console.Write(' ');
+                }
+                if (y == data.First().Count() - 1) Console.WriteLine();
+            }
+        }
+
+        return end.Distance;
+    }
+
+    class Node
+    {
+        public bool IsStart { get; set; }
+        public bool IsEnd { get; set; }
+        public Node? ComeFrom { get; set; }
+        [JsonIgnore]
+        public List<Node> Paths { get; set; } = new();
+        public long Distance { get; set; }
+        public int Level { get; set; }
+        public (int x, int y) Position { get; set;}
+    }
+
+    List<List<Node>> Parse(string input)
+    {
+        var data = new List<List<Node>>();
+        foreach (var (i, line) in input.SplitLines().Enumerate())
+        {
+            var next = new List<Node>();
+            data.Add(next);
+            foreach (var (j, c) in line.ToCharArray().Enumerate())
+            {
+                next.Add(new Node{
+                    IsStart = c == 'S',
+                    IsEnd = c == 'E',
+                    Level = c == 'S' ? (int)'a' - 96
+                        : c == 'E' ? (int)'z' - 96 : (int)c - 96,
+                    Distance = c == 'S' ? 0 : long.MaxValue,
+                    Position = (i, j),
+                });
+            }
         }
         return data;
     }
 
-    (int x, int y) FindMarker(string input, char marker)
-    {
-        foreach (var (i, line) in input.SplitLines().Enumerate())
+    List<Node> PossibleSteps(List<List<Node>> map, (int x, int y) p) => new List<(int x, int y)>() 
         {
-            foreach (var (j, c) in line.ToCharArray().Enumerate())
-            {
-                if (c == marker)
-                {
-                    return (i, j);
-                }
-            }
-        }
-        throw new Exception("missing marker");
-    }
-
-    List<(int x, int y)> PossibleSteps((int x, int y) p) => new() {
-        (p.x - 1, p.y),
-        (p.x + 1, p.y),
-        (p.x, p.y - 1),
-        (p.x, p.y + 1),
-    };
-
-    record WalkedPath
-    {
-        public required (int x, int y) Start { get; set; }
-        public required (int x, int y) End { get; set; }
-        public required List<(int x, int y)> Path { get; set; }
-        public required List<List<int>> Map { get; set; }
-
-        public WalkedPath MakeClone() => this with
-        {
-            Path = new(Path),
-        };
-
-        public WalkedPath WithStep((int x, int y) step)
-        {
-            Path.Add(step);
-            return this;
-        }
-
-        public bool IsOnMap((int x, int y) p) => 
-            p.x >= 0 && p.x < Map.Count() &&
-            p.y >= 0 && p.y < Map.First().Count();
-
-        public bool CanWalk((int x, int y) a, (int x, int y) b)
-        {
-            if (a == b) return false;
-            if (!IsOnMap(b)) return false;
-            if (!IsOnMap(a)) return false;
-
-            var currentHeight = Map[a.x][a.y];
-            var candidateHeight = Map[b.x][b.y];
-
-            return new[]{currentHeight - 1, currentHeight, currentHeight + 1}.Contains(candidateHeight);
-        }
-    }
+            (p.x - 1, p.y),
+            (p.x + 1, p.y),
+            (p.x, p.y - 1),
+            (p.x, p.y + 1),
+        }.Where(x => x.x >= 0 && x.x < map.Count() && x.y >= 0 && x.y < map.First().Count())
+        .Where(x => map[x.x][x.y].Level <= map[p.x][p.y].Level + 1)
+        .Select(x => map[x.x][x.y])
+        .ToList();
 }
