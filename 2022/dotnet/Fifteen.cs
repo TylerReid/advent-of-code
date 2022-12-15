@@ -49,27 +49,28 @@ public class Fifteen : AdventDay
         }
         var sensors = Parse(input);
 
-        for (var y = 0; y <= max; y++)
-        for (var x = 0; x <= max; x++)
-        {
-            var empty = true;
-            foreach (var sensor in sensors)
+        Parallel.ForEach(Enumerable.Range(0, max), y => {
+            for (var x = 0; x <= max; x++)
             {
-                var advance = sensor.CanAdvanceBy((x, y));
-                if (advance.HasValue)
+                var empty = true;
+                foreach (var sensor in sensors)
                 {
-                    x += advance.Value;
-                    empty = false;
-                    break;
+                    var advance = sensor.CanAdvanceBy((x, y));
+                    if (advance.HasValue)
+                    {
+                        x += advance.Value;
+                        empty = false;
+                        break;
+                    }
+                }
+                if (empty)
+                {
+                    stopwatch.Stop();
+                    Console.WriteLine($"wow! {x}, {y} {x * 4_000_000L + y} in {stopwatch.ElapsedMilliseconds}ms");
+                    return;
                 }
             }
-            if (empty)
-            {
-                stopwatch.Stop();
-                Console.WriteLine($"wow! {x}, {y} {x * 4_000_000L + y} in {stopwatch.ElapsedMilliseconds}ms");
-                return;
-            }
-        }
+        });
     }
 
     record Sensor
