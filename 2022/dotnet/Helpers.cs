@@ -9,7 +9,14 @@ public static class Helpers
         return (a[0], a[1]);
     }
 
+    public static (string a, string b, string c) SplitTwice(this string s, string sep)
+    {
+        var a = s.Split(sep);
+        return (a[0], a[1], a[2]);
+    }
+
     public static (T2 a, T2 b) Convert<T, T2>(this (T a, T b) p, Func<T, T2> convert) => (convert(p.a), convert(p.b));
+    public static (T2 a, T2 b, T2 c) Convert<T, T2>(this (T a, T b, T c) p, Func<T, T2> convert) => (convert(p.a), convert(p.b), convert(p.c));
 
     public static IEnumerable<(int index, T item)> Enumerate<T>(this IEnumerable<T> source) => source.Select((item, index) => (index, item));
 
