@@ -15,6 +15,17 @@ public class Seventeen : AdventDay
         cave.Simulate(2022);
     }
 
+    public void PartTwo(string input)
+    {
+        Cave.Debug = false;
+        var cave = new Cave
+        {
+            Moves = GetMoves(input),
+        };
+
+        cave.Simulate(1_000_000_000_000);
+    }
+
     IEnumerable<Move> GetMoves(string input) => input.ToCharArray()
         .Select(c => c switch {
             '<' => Move.Left,
@@ -24,7 +35,7 @@ public class Seventeen : AdventDay
 
     class Cave
     {
-        public HashSet<(int x, int y)> Points { get; set; } = new();
+        public HashSet<(long x, long y)> Points { get; set; } = new();
         public required IEnumerable<Move> Moves { get; set; }
         public IEnumerable<Rock> Rocks { get; }
 
@@ -75,13 +86,15 @@ public class Seventeen : AdventDay
         }
 
 
-        public void Simulate(int until)
+        public void Simulate(long until)
         {
             var count = 0;
             var moves = Moves.GetEnumerator();
+            var maxY = 0L;
             foreach (var r in Rocks)
             {
-                var rock = r.New(Points.Max(x => x.y) + 4);
+                if (count % 1_000_000 == 0) Console.WriteLine(count);
+                var rock = r.New(maxY + 4);
                 while (moves.MoveNext())
                 {
                     Print(rock);
@@ -101,6 +114,10 @@ public class Seventeen : AdventDay
                         // hit something on this move, get next rock
                         foreach (var p in rock.Points)
                         {
+                            if (p.y > maxY)
+                            {
+                                maxY = p.y;
+                            }
                             Points.Add(p);
                         }
                         count += 1;
@@ -162,11 +179,11 @@ public class Seventeen : AdventDay
 
     record Rock
     {
-        public List<(int x, int y)> Points { get; set; } = new();
+        public List<(long x, long y)> Points { get; set; } = new();
 
         public Rock MakeMove(Move move)
         {
-            (int x, int y) step = move switch {
+            (long x, long y) step = move switch {
                 Move.Left => (-1, 0),
                 Move.Right => (1, 0),
                 Move.Down => (0, -1),
@@ -177,7 +194,7 @@ public class Seventeen : AdventDay
             };
         }
 
-        public Rock New(int y)
+        public Rock New(long y)
         {
             return new Rock {
                 Points = Points.Select(p => (p.x, p.y + y)).ToList(),
